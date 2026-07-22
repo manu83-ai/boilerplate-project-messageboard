@@ -1,6 +1,6 @@
 'use strict';
 
-const Thread = require('../models/thread.js');
+const Thread = require('../models/Thread.js');
 
 
 module.exports = function (app) {
