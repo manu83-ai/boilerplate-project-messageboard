@@ -3,6 +3,8 @@ require('dotenv').config();
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
+const helmet      = require('helmet');
+const mongoose    = require('mongoose');
 
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
@@ -13,7 +15,25 @@ const app = express();
 app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({origin: '*'})); //For FCC testing purposes only
+app.use(helmet());
 
+app.use(
+  helmet.frameguard({
+    action: "sameorigin"
+  })
+);
+
+app.use(
+  helmet.dnsPrefetchControl({
+    allow: false
+  })
+);
+
+app.use(
+  helmet.referrerPolicy({
+    policy: "same-origin"
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -44,6 +64,16 @@ app.use(function(req, res, next) {
   res.status(404)
     .type('text')
     .send('Not Found');
+});
+
+mongoose.connect(process.env.DB);
+
+const db = mongoose.connection;
+
+db.on("error", console.error.bind(console, "Error de conexión:"));
+
+db.once("open", () => {
+  console.log("Conectado a MongoDB");
 });
 
 //Start our server and tests!
